@@ -10,7 +10,7 @@ function KPICard({ title, value, color, subtitle, icon }) {
         <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">{title}</p>
         <span className="text-lg" style={{ opacity: 0.6 }}>{icon}</span>
       </div>
-      <p className="text-2xl font-bold mt-0.5" style={{ color }}>
+      <p className="text-lg sm:text-2xl font-bold mt-0.5 break-all" style={{ color }}>
         {formatHUF(value)}
       </p>
       {subtitle && <p className="text-xs text-gray-400">{subtitle}</p>}
@@ -32,7 +32,7 @@ function ProjectTypeCard({ ratio }) {
       {hasData ? (
         <>
           <div className="flex items-end gap-1.5 mt-0.5">
-            <span className="text-2xl font-bold" style={{ color: 'var(--secondary)' }}>
+            <span className="text-lg sm:text-2xl font-bold" style={{ color: 'var(--secondary)' }}>
               {ratio.haviPct}%
             </span>
             <span className="text-sm text-gray-400 mb-0.5">havi</span>
@@ -59,7 +59,7 @@ function ProjectTypeCard({ ratio }) {
 
 export default function KPICards({ kpis, projectTypeRatio }) {
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
       <KPICard
         title="Összes Bevétel"
         value={kpis.income}

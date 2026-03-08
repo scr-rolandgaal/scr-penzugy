@@ -80,19 +80,19 @@ export default function ClientsView({ transactions, forecasts }) {
           <h2 className="text-xl font-bold text-gray-800">Ügyfelek</h2>
           <p className="text-sm text-gray-400">{clients.length} ügyfél</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setShowReport(true)}
-            className="text-sm px-4 py-1.5 rounded-lg border border-purple-300 text-purple-600 hover:bg-purple-50 transition-colors"
+            className="text-sm px-3 py-1.5 rounded-lg border border-purple-300 text-purple-600 hover:bg-purple-50 transition-colors"
           >
-            📄 Riport
+            📄 <span className="hidden sm:inline">Riport</span>
           </button>
           <div className="flex rounded-lg overflow-hidden border border-gray-200">
             {PERIOD_OPTIONS.map(({ value, label }) => (
               <button
                 key={value}
                 onClick={() => setPeriod(value)}
-                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                className={`px-2 sm:px-3 py-1.5 text-xs font-medium transition-colors ${
                   period === value
                     ? 'bg-purple-600 text-white'
                     : 'bg-white text-gray-500 hover:bg-gray-50'

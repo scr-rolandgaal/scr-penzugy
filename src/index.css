@@ -103,6 +103,23 @@ button { font-family: inherit; }
   border-bottom: 1px solid #222;
 }
 
+/* ─── Mobile responsive tweaks ─── */
+@media (max-width: 639px) {
+  .modal-overlay {
+    padding: 0.5rem;
+    align-items: flex-end;
+  }
+  .modal-box {
+    padding: 1.25rem;
+    border-radius: 18px 18px 14px 14px;
+    max-height: 96vh;
+  }
+  .card {
+    border-radius: 12px;
+    padding: 1rem;
+  }
+}
+
 /* ─── Scrollbar ─── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: #f0eeff; }

@@ -76,7 +76,7 @@ export default function ForecastView({ forecasts, onAdd, onStatusChange, onDelet
       </div>
 
       {/* KPI összesítők */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <div className="card text-center">
           <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide">Pipeline értéke</p>
           <p className="text-xl font-bold mt-1" style={{ color: 'var(--primary)' }}>{formatHUF(totalPipeline)}</p>

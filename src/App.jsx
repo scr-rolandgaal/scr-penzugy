@@ -66,7 +66,7 @@ function MainApp({ user, onSignOut }) {
       {loading ? (
         <LoadingSpinner />
       ) : (
-        <>
+        <div className="pb-16 sm:pb-0">
           {activeTab === 'dashboard' && (
             <Dashboard
               transactions={transactions}
@@ -103,7 +103,7 @@ function MainApp({ user, onSignOut }) {
           {activeTab === 'clients' && (
             <ClientsView transactions={transactions} forecasts={forecasts} />
           )}
-        </>
+        </div>
       )}
     </div>
   );

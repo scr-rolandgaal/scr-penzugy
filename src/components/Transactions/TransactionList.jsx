@@ -64,20 +64,22 @@ export default function TransactionList({
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col gap-4">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-xl font-bold text-gray-800">Tranzakciók</h2>
         <div className="flex gap-2">
           <button
             onClick={() => setShowImport(true)}
-            className="text-sm px-4 py-2 rounded-lg border border-purple-300 text-purple-600 hover:bg-purple-50 transition-colors"
+            className="text-sm px-3 py-2 rounded-lg border border-purple-300 text-purple-600 hover:bg-purple-50 transition-colors"
           >
-            ↑ Bank Import
+            <span className="hidden sm:inline">↑ Bank Import</span>
+            <span className="sm:hidden">↑ Import</span>
           </button>
           <button
             onClick={() => setShowModal(true)}
             className="btn-primary text-sm"
           >
-            + Tranzakció hozzáadása
+            <span className="hidden sm:inline">+ Tranzakció hozzáadása</span>
+            <span className="sm:hidden">+ Hozzáadás</span>
           </button>
         </div>
       </div>

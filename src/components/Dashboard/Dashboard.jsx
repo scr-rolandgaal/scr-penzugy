@@ -54,59 +54,55 @@ function GoalCard({ transactions, goals, setGoal }) {
         </h3>
       </div>
 
-      <div className="flex items-end gap-6">
-        <div className="flex-1">
-          <div className="flex items-baseline gap-3 mb-3">
-            <div>
-              <p className="text-xs text-gray-400 mb-0.5">Cél</p>
-              {editing ? (
-                <input
-                  type="number"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onBlur={saveGoal}
-                  onKeyDown={(e) => e.key === 'Enter' && saveGoal()}
-                  autoFocus
-                  className="w-36 border border-purple-400 rounded-lg px-2 py-1 text-sm font-bold focus:outline-none"
-                  placeholder="pl. 1000000"
-                />
-              ) : (
-                <button
-                  onClick={startEdit}
-                  className="text-xl font-bold bg-transparent border-none cursor-pointer p-0 hover:opacity-70 transition-opacity"
-                  style={{ color: 'var(--primary)' }}
-                  title="Kattints a szerkesztéshez"
-                >
-                  {currentGoal > 0 ? formatHUF(currentGoal) : (
-                    <span className="text-sm font-medium text-gray-400 border border-dashed border-gray-300 rounded-lg px-3 py-1.5">
-                      + Cél beállítása
-                    </span>
-                  )}
-                </button>
+      <div className={`grid gap-3 mb-1 ${currentGoal > 0 ? 'grid-cols-3' : 'grid-cols-2'}`}>
+        <div>
+          <p className="text-xs text-gray-400 mb-1">Cél</p>
+          {editing ? (
+            <input
+              type="number"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onBlur={saveGoal}
+              onKeyDown={(e) => e.key === 'Enter' && saveGoal()}
+              autoFocus
+              className="w-full border border-purple-400 rounded-lg px-2 py-1 text-sm font-bold focus:outline-none"
+              placeholder="pl. 1000000"
+            />
+          ) : (
+            <button
+              onClick={startEdit}
+              className="text-left text-base sm:text-xl font-bold bg-transparent border-none cursor-pointer p-0 hover:opacity-70 transition-opacity leading-tight"
+              style={{ color: 'var(--primary)' }}
+              title="Kattints a szerkesztéshez"
+            >
+              {currentGoal > 0 ? formatHUF(currentGoal) : (
+                <span className="text-xs sm:text-sm font-medium text-gray-400 border border-dashed border-gray-300 rounded-lg px-2 py-1">
+                  + Beállítás
+                </span>
               )}
-            </div>
-            <div>
-              <p className="text-xs text-gray-400 mb-0.5">Tényleges</p>
-              <p className="text-xl font-bold text-green-600">{formatHUF(monthRevenue)}</p>
-            </div>
-            {currentGoal > 0 && (
-              <div>
-                <p className="text-xs text-gray-400 mb-0.5">Teljesítés</p>
-                <p className="text-xl font-bold" style={{ color: barColor }}>{pct}%</p>
-              </div>
-            )}
-          </div>
-
-          {currentGoal > 0 && (
-            <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(pct, 100)}%`, background: barColor }}
-              />
-            </div>
+            </button>
           )}
         </div>
+        <div>
+          <p className="text-xs text-gray-400 mb-1">Tényleges</p>
+          <p className="text-base sm:text-xl font-bold text-green-600 leading-tight">{formatHUF(monthRevenue)}</p>
+        </div>
+        {currentGoal > 0 && (
+          <div>
+            <p className="text-xs text-gray-400 mb-1">Teljesítés</p>
+            <p className="text-base sm:text-xl font-bold leading-tight" style={{ color: barColor }}>{pct}%</p>
+          </div>
+        )}
       </div>
+
+      {currentGoal > 0 && (
+        <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden mt-2">
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            style={{ width: `${Math.min(pct, 100)}%`, background: barColor }}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -144,14 +140,14 @@ export default function Dashboard({ transactions, forecasts, goals, setGoal }) {
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col gap-6">
       {/* Fejléc + Év választó */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-xl font-bold text-gray-800">Áttekintés</h2>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowReport(true)}
-            className="text-sm px-4 py-1.5 rounded-lg border border-purple-300 text-purple-600 hover:bg-purple-50 transition-colors"
+            className="text-sm px-3 py-1.5 rounded-lg border border-purple-300 text-purple-600 hover:bg-purple-50 transition-colors"
           >
-            📄 Riport
+            📄 <span className="hidden sm:inline">Riport</span>
           </button>
           <div className="flex items-center gap-0 bg-white rounded-lg border border-gray-200">
             <button
@@ -185,7 +181,7 @@ export default function Dashboard({ transactions, forecasts, goals, setGoal }) {
 
       {/* ÁFA összesítő */}
       <div className="card">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
           <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
             ÁFA összesítő — {year}
           </h3>
@@ -216,7 +212,7 @@ export default function Dashboard({ transactions, forecasts, goals, setGoal }) {
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-6 lg:grid-cols-12 gap-2">
+          <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-2">
             {monthlyVAT.map((m) => (
               <div key={m.month} className="rounded-xl p-2 text-center" style={{ background: 'rgba(123,92,246,0.07)' }}>
                 <p className="text-xs text-gray-400 mb-0.5">{monthLabel(m.month)}</p>

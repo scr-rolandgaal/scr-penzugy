@@ -41,8 +41,8 @@ export default function TransactionRow({ tx, selected, onSelect, onToggleStatus,
           {isPaid ? 'Fizetve' : 'Kifizetetlen'}
         </button>
       </td>
-      <td className="py-3 px-3 text-right">
-        <div className="flex items-center justify-end gap-1">
+      <td className="py-3 px-2 text-right">
+        <div className="flex items-center justify-end gap-0.5">
           <button
             onClick={() => onEdit(tx.id)}
             className="text-gray-300 hover:text-blue-500 transition-colors text-base bg-transparent border-none cursor-pointer"
