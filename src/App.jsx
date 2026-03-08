@@ -1,13 +1,16 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard/Dashboard';
 import TransactionList from './components/Transactions/TransactionList';
 import ForecastView from './components/Forecast/ForecastView';
+import ClientsView from './components/Clients/ClientsView';
 import LoginPage from './components/LoginPage';
 import { useTransactions } from './hooks/useTransactions';
 import { useForecasts } from './hooks/useForecasts';
+import { useGoals } from './hooks/useGoals';
 import { useAuth } from './hooks/useAuth';
 import { isSupabaseReady } from './lib/supabase';
+import { getKnownPartners } from './utils/calculations';
 
 function LoadingSpinner() {
   return (
@@ -27,12 +30,16 @@ function MainApp({ user, onSignOut }) {
   const {
     transactions,
     incomeCategories,
+    expenseCategories,
     loading: txLoading,
     addTransaction,
+    addTransactions,
+    updateTransaction,
     deleteTransaction,
     deleteTransactions,
     toggleStatus,
     addIncomeCategory,
+    addExpenseCategory,
   } = useTransactions();
 
   const {
@@ -42,6 +49,13 @@ function MainApp({ user, onSignOut }) {
     updateForecastStatus,
     deleteForecast,
   } = useForecasts();
+
+  const { goals, setGoal } = useGoals();
+
+  const knownPartners = useMemo(
+    () => getKnownPartners(transactions, forecasts),
+    [transactions, forecasts]
+  );
 
   const loading = txLoading || fcLoading;
 
@@ -54,17 +68,27 @@ function MainApp({ user, onSignOut }) {
       ) : (
         <>
           {activeTab === 'dashboard' && (
-            <Dashboard transactions={transactions} forecasts={forecasts} />
+            <Dashboard
+              transactions={transactions}
+              forecasts={forecasts}
+              goals={goals}
+              setGoal={setGoal}
+            />
           )}
           {activeTab === 'transactions' && (
             <TransactionList
               transactions={transactions}
               incomeCategories={incomeCategories}
+              expenseCategories={expenseCategories}
               onToggleStatus={toggleStatus}
               onDelete={deleteTransaction}
               onDeleteBulk={deleteTransactions}
               onAdd={addTransaction}
+              onAddBulk={addTransactions}
               onAddCategory={addIncomeCategory}
+              onAddExpenseCategory={addExpenseCategory}
+              onUpdateTransaction={updateTransaction}
+              knownPartners={knownPartners}
             />
           )}
           {activeTab === 'forecast' && (
@@ -73,7 +97,11 @@ function MainApp({ user, onSignOut }) {
               onAdd={addForecast}
               onStatusChange={updateForecastStatus}
               onDelete={deleteForecast}
+              knownClients={knownPartners}
             />
+          )}
+          {activeTab === 'clients' && (
+            <ClientsView transactions={transactions} forecasts={forecasts} />
           )}
         </>
       )}

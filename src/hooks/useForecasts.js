@@ -20,6 +20,10 @@ function fromDb(row) {
     expectedDate: row.expected_date,
     status: row.status,
     notes: row.notes || '',
+    forecastType: row.forecast_type || 'bevétel',
+    forClient: row.for_client || '',
+    vatRate: row.vat_rate || 0,
+    netAmount: row.net_amount || null,
   };
 }
 
@@ -31,6 +35,10 @@ function toDb(fc) {
     expected_date: fc.expectedDate,
     status: fc.status,
     notes: fc.notes || '',
+    forecast_type: fc.forecastType || 'bevétel',
+    for_client: fc.forClient || '',
+    vat_rate: fc.vatRate || 0,
+    net_amount: fc.netAmount || null,
   };
 }
 

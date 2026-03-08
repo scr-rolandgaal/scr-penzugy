@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase, isSupabaseReady } from '../lib/supabase';
-import { sampleTransactions, INCOME_CATEGORIES_DEFAULT } from '../data/sampleData';
+import { sampleTransactions, INCOME_CATEGORIES_DEFAULT, EXPENSE_CATEGORIES } from '../data/sampleData';
 
 const TX_KEY = 'scrollers_transactions';
 const CAT_KEY = 'scrollers_income_categories';
+const EXPENSE_CAT_KEY = 'scrollers_expense_categories';
 
 function localLoad(key, fallback) {
   try {
@@ -29,6 +30,7 @@ function fromDb(row) {
     netAmount: row.net_amount,
     status: row.status,
     notes: row.notes || '',
+    projectType: row.project_type || null,
   };
 }
 
@@ -44,12 +46,14 @@ function toDb(tx) {
     net_amount: tx.netAmount,
     status: tx.status,
     notes: tx.notes || '',
+    project_type: tx.projectType || null,
   };
 }
 
 export function useTransactions() {
   const [transactions, setTransactions] = useState([]);
   const [incomeCategories, setIncomeCategories] = useState(INCOME_CATEGORIES_DEFAULT);
+  const [expenseCategories, setExpenseCategories] = useState(EXPENSE_CATEGORIES);
   const [loading, setLoading] = useState(true);
 
   // ── Betöltés ────────────────────────────────────────────────
@@ -59,30 +63,35 @@ export function useTransactions() {
     } else {
       setTransactions(localLoad(TX_KEY, sampleTransactions));
       setIncomeCategories(localLoad(CAT_KEY, INCOME_CATEGORIES_DEFAULT));
+      setExpenseCategories(localLoad(EXPENSE_CAT_KEY, EXPENSE_CATEGORIES));
       setLoading(false);
     }
   }, []);
 
   async function loadFromSupabase() {
     setLoading(true);
-    const [txRes, catRes] = await Promise.all([
+    const [txRes, catRes, expCatRes] = await Promise.all([
       supabase.from('transactions').select('*').order('date', { ascending: false }),
       supabase.from('income_categories').select('name'),
+      supabase.from('expense_categories').select('name'),
     ]);
 
     if (txRes.data) {
       const txs = txRes.data.length > 0 ? txRes.data.map(fromDb) : sampleTransactions;
       setTransactions(txs);
-      localSave(TX_KEY, txs); // offline cache
+      localSave(TX_KEY, txs);
     }
 
     if (catRes.data && catRes.data.length > 0) {
       setIncomeCategories(catRes.data.map((r) => r.name));
     }
+
+    if (expCatRes.data && expCatRes.data.length > 0) {
+      setExpenseCategories(expCatRes.data.map((r) => r.name));
+    }
     setLoading(false);
   }
 
-  // Helyi mentés (csak localStorage módban)
   useEffect(() => {
     if (!isSupabaseReady && !loading) localSave(TX_KEY, transactions);
   }, [transactions, loading]);
@@ -106,6 +115,26 @@ export function useTransactions() {
     setTransactions((prev) => [newTx, ...prev]);
   }, []);
 
+  // ── Tömeges hozzáadás (import) ──────────────────────────────
+  const addTransactions = useCallback(async (txList) => {
+    const withIds = txList.map((tx) => {
+      const netAmount = Math.round(tx.amount / (1 + tx.vatRate / 100));
+      return { ...tx, id: crypto.randomUUID(), netAmount };
+    });
+
+    if (isSupabaseReady) {
+      const { data, error } = await supabase
+        .from('transactions')
+        .insert(withIds.map(toDb))
+        .select();
+      if (!error && data) {
+        setTransactions((prev) => [...data.map(fromDb), ...prev]);
+        return;
+      }
+    }
+    setTransactions((prev) => [...withIds, ...prev]);
+  }, []);
+
   // ── Törlés ──────────────────────────────────────────────────
   const deleteTransaction = useCallback(async (id) => {
     if (isSupabaseReady) {
@@ -120,6 +149,20 @@ export function useTransactions() {
     }
     const set = new Set(ids);
     setTransactions((prev) => prev.filter((tx) => !set.has(tx.id)));
+  }, []);
+
+  // ── Szerkesztés ─────────────────────────────────────────────
+  const updateTransaction = useCallback(async (id, updates) => {
+    setTransactions((prev) => {
+      const tx = prev.find((t) => t.id === id);
+      if (!tx) return prev;
+      const netAmount = Math.round(Number(updates.amount) / (1 + Number(updates.vatRate) / 100));
+      const updated = { ...tx, ...updates, netAmount };
+      if (isSupabaseReady) {
+        supabase.from('transactions').update(toDb(updated)).eq('id', id);
+      }
+      return prev.map((t) => t.id === id ? updated : t);
+    });
   }, []);
 
   // ── Státusz váltás ──────────────────────────────────────────
@@ -138,7 +181,7 @@ export function useTransactions() {
     });
   }, []);
 
-  // ── Kategória hozzáadás ─────────────────────────────────────
+  // ── Bevételi kategória hozzáadás ────────────────────────────
   const addIncomeCategory = useCallback(async (name) => {
     const trimmed = name.trim();
     if (!trimmed || incomeCategories.includes(trimmed)) return;
@@ -153,14 +196,33 @@ export function useTransactions() {
     });
   }, [incomeCategories]);
 
+  // ── Kiadási kategória hozzáadás ─────────────────────────────
+  const addExpenseCategory = useCallback(async (name) => {
+    const trimmed = name.trim();
+    if (!trimmed || expenseCategories.includes(trimmed)) return;
+
+    if (isSupabaseReady) {
+      await supabase.from('expense_categories').insert([{ name: trimmed }]);
+    }
+    setExpenseCategories((prev) => {
+      const next = [...prev, trimmed];
+      if (!isSupabaseReady) localSave(EXPENSE_CAT_KEY, next);
+      return next;
+    });
+  }, [expenseCategories]);
+
   return {
     transactions,
     incomeCategories,
+    expenseCategories,
     loading,
     addTransaction,
+    addTransactions,
+    updateTransaction,
     deleteTransaction,
     deleteTransactions,
     toggleStatus,
     addIncomeCategory,
+    addExpenseCategory,
   };
 }

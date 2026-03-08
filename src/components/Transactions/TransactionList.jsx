@@ -2,19 +2,27 @@ import { useState, useMemo } from 'react';
 import TransactionRow from './TransactionRow';
 import TransactionFilters from './TransactionFilters';
 import AddTransactionModal from '../AddTransaction/AddTransactionModal';
+import BankImportModal from '../Import/BankImportModal';
 
 export default function TransactionList({
   transactions,
   incomeCategories,
+  expenseCategories,
   onToggleStatus,
   onDelete,
   onDeleteBulk,
   onAdd,
+  onAddBulk,
   onAddCategory,
+  onAddExpenseCategory,
+  onUpdateTransaction,
+  knownPartners,
 }) {
   const [filters, setFilters] = useState({ month: '', type: '', category: '', status: '' });
   const [selected, setSelected] = useState(new Set());
   const [showModal, setShowModal] = useState(false);
+  const [showImport, setShowImport] = useState(false);
+  const [editingTx, setEditingTx] = useState(null);
 
   const filtered = useMemo(() => {
     return transactions.filter((tx) => {
@@ -46,6 +54,11 @@ export default function TransactionList({
     }
   }
 
+  function handleEdit(txId) {
+    const tx = transactions.find((t) => t.id === txId);
+    if (tx) setEditingTx(tx);
+  }
+
   const allSelected = filtered.length > 0 && filtered.every((tx) => selected.has(tx.id));
 
   return (
@@ -53,12 +66,20 @@ export default function TransactionList({
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl font-bold text-gray-800">Tranzakciók</h2>
-        <button
-          onClick={() => setShowModal(true)}
-          className="btn-primary text-sm"
-        >
-          + Tranzakció hozzáadása
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowImport(true)}
+            className="text-sm px-4 py-2 rounded-lg border border-purple-300 text-purple-600 hover:bg-purple-50 transition-colors"
+          >
+            ↑ Bank Import
+          </button>
+          <button
+            onClick={() => setShowModal(true)}
+            className="btn-primary text-sm"
+          >
+            + Tranzakció hozzáadása
+          </button>
+        </div>
       </div>
 
       {/* Szűrők */}
@@ -126,6 +147,7 @@ export default function TransactionList({
                   onSelect={handleSelect}
                   onToggleStatus={onToggleStatus}
                   onDelete={onDelete}
+                  onEdit={handleEdit}
                 />
               ))
             )}
@@ -143,7 +165,38 @@ export default function TransactionList({
           onClose={() => setShowModal(false)}
           onAdd={onAdd}
           incomeCategories={incomeCategories}
+          expenseCategories={expenseCategories}
           onAddCategory={onAddCategory}
+          onAddExpenseCategory={onAddExpenseCategory}
+          knownPartners={knownPartners}
+        />
+      )}
+
+      {editingTx && (
+        <AddTransactionModal
+          onClose={() => setEditingTx(null)}
+          onUpdate={(updates) => {
+            onUpdateTransaction(editingTx.id, updates);
+            setEditingTx(null);
+          }}
+          incomeCategories={incomeCategories}
+          expenseCategories={expenseCategories}
+          onAddCategory={onAddCategory}
+          onAddExpenseCategory={onAddExpenseCategory}
+          editMode
+          initialData={editingTx}
+          knownPartners={knownPartners}
+        />
+      )}
+
+      {showImport && (
+        <BankImportModal
+          onClose={() => setShowImport(false)}
+          onImport={onAddBulk}
+          incomeCategories={incomeCategories}
+          expenseCategories={expenseCategories}
+          onAddCategory={onAddCategory}
+          onAddExpenseCategory={onAddExpenseCategory}
         />
       )}
     </div>

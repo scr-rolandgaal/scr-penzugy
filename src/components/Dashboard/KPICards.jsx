@@ -1,6 +1,6 @@
 import { formatHUF } from '../../utils/formatters';
 
-function KPICard({ title, value, color, bg, subtitle, icon }) {
+function KPICard({ title, value, color, subtitle, icon }) {
   return (
     <div
       className="card flex flex-col gap-1 relative overflow-hidden"
@@ -18,9 +18,48 @@ function KPICard({ title, value, color, bg, subtitle, icon }) {
   );
 }
 
-export default function KPICards({ kpis }) {
+function ProjectTypeCard({ ratio }) {
+  const hasData = ratio && ratio.total > 0;
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div
+      className="card flex flex-col gap-1 relative overflow-hidden"
+      style={{ borderTop: '3px solid var(--secondary)' }}
+    >
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">Visszatérő / Egyszeri</p>
+        <span className="text-lg" style={{ opacity: 0.6 }}>♻</span>
+      </div>
+      {hasData ? (
+        <>
+          <div className="flex items-end gap-1.5 mt-0.5">
+            <span className="text-2xl font-bold" style={{ color: 'var(--secondary)' }}>
+              {ratio.haviPct}%
+            </span>
+            <span className="text-sm text-gray-400 mb-0.5">havi</span>
+          </div>
+          {/* Arány sáv */}
+          <div className="flex h-1.5 rounded-full overflow-hidden bg-gray-100 mt-1">
+            <div
+              className="bg-blue-400 transition-all"
+              style={{ width: `${ratio.haviPct}%` }}
+            />
+            <div
+              className="bg-orange-400 transition-all"
+              style={{ width: `${ratio.egyszeriPct}%` }}
+            />
+          </div>
+          <p className="text-xs text-gray-400">Egyszeri: {ratio.egyszeriPct}%</p>
+        </>
+      ) : (
+        <p className="text-sm text-gray-300 mt-1">Nincs adat</p>
+      )}
+    </div>
+  );
+}
+
+export default function KPICards({ kpis, projectTypeRatio }) {
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
       <KPICard
         title="Összes Bevétel"
         value={kpis.income}
@@ -46,6 +85,7 @@ export default function KPICards({ kpis }) {
         subtitle="Várható bevétel"
         icon="⏳"
       />
+      <ProjectTypeCard ratio={projectTypeRatio} />
     </div>
   );
 }

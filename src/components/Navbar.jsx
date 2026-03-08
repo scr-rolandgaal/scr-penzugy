@@ -3,6 +3,7 @@ export default function Navbar({ activeTab, setActiveTab, user, onSignOut }) {
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'transactions', label: 'Tranzakciók' },
     { id: 'forecast', label: 'Tervezés' },
+    { id: 'clients', label: 'Ügyfelek' },
   ];
 
   return (

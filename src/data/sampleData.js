@@ -19,6 +19,16 @@ export const EXPENSE_CATEGORIES = [
   'Egyéb',
 ];
 
+export const FORECAST_EXPENSE_CATEGORIES = [
+  'Videós alvállalkozó',
+  'Grafikus',
+  'Fejlesztő',
+  'Copywriter',
+  'Hirdetési büdzsé',
+  'Szoftver/Licenc',
+  'Egyéb alvállalkozó',
+];
+
 const calcNet = (amount, vatRate) => Math.round(amount / (1 + vatRate / 100));
 
 export const sampleTransactions = [

@@ -1,6 +1,6 @@
 import { formatHUF, formatDate } from '../../utils/formatters';
 
-export default function TransactionRow({ tx, selected, onSelect, onToggleStatus, onDelete }) {
+export default function TransactionRow({ tx, selected, onSelect, onToggleStatus, onDelete, onEdit }) {
   const isIncome = tx.type === 'bevétel';
   const isPaid = tx.status === 'fizetve';
 
@@ -42,17 +42,26 @@ export default function TransactionRow({ tx, selected, onSelect, onToggleStatus,
         </button>
       </td>
       <td className="py-3 px-3 text-right">
-        <button
-          onClick={() => {
-            if (window.confirm(`Biztosan törlöd ezt a tranzakciót?\n${tx.partner} — ${formatHUF(tx.amount)}`)) {
-              onDelete(tx.id);
-            }
-          }}
-          className="text-gray-300 hover:text-red-500 transition-colors text-lg bg-transparent border-none cursor-pointer"
-          title="Törlés"
-        >
-          🗑
-        </button>
+        <div className="flex items-center justify-end gap-1">
+          <button
+            onClick={() => onEdit(tx.id)}
+            className="text-gray-300 hover:text-blue-500 transition-colors text-base bg-transparent border-none cursor-pointer"
+            title="Szerkesztés"
+          >
+            ✏
+          </button>
+          <button
+            onClick={() => {
+              if (window.confirm(`Biztosan törlöd ezt a tranzakciót?\n${tx.partner} — ${formatHUF(tx.amount)}`)) {
+                onDelete(tx.id);
+              }
+            }}
+            className="text-gray-300 hover:text-red-500 transition-colors text-lg bg-transparent border-none cursor-pointer"
+            title="Törlés"
+          >
+            🗑
+          </button>
+        </div>
       </td>
     </tr>
   );
