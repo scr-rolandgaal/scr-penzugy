@@ -51,7 +51,7 @@ export default function BankImportModal({
     setPasteText('');
   }
 
-  function handleImport() {
+  async function handleImport() {
     if (!rows?.length) return;
     const txs = rows.map((row, i) =>
       importRowToTransaction(row, {
@@ -59,8 +59,14 @@ export default function BankImportModal({
         projectType: projectTypes[i] || null,
       })
     );
-    onImport(txs);
-    onClose();
+    setLoading(true);
+    try {
+      await onImport(txs);
+      onClose();
+    } catch (err) {
+      setLoading(false);
+      alert(`Import sikertelen — az adatbázis hibát jelzett:\n\n${err.message}\n\nEllenőrizd a Supabase kapcsolatot és a táblastruktúrát.`);
+    }
   }
 
   function handleAddNewCat(i, row) {

@@ -56,7 +56,7 @@ export default function AddTransactionModal({
     }));
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!form.date || !form.category || !form.amount) return;
     const payload = {
@@ -64,12 +64,16 @@ export default function AddTransactionModal({
       amount: Number(form.amount),
       vatRate: Number(form.vatRate),
     };
-    if (editMode) {
-      onUpdate(payload);
-    } else {
-      onAdd(payload);
+    try {
+      if (editMode) {
+        await onUpdate(payload);
+      } else {
+        await onAdd(payload);
+      }
+      onClose();
+    } catch (err) {
+      alert(`Mentés sikertelen:\n\n${err.message}`);
     }
-    onClose();
   }
 
   function handleAddCategory() {

@@ -76,6 +76,7 @@ export function useTransactions() {
       supabase.from('expense_categories').select('name'),
     ]);
 
+    if (txRes.error) console.error('[useTransactions] load error:', txRes.error);
     if (txRes.data) {
       const txs = txRes.data.map(fromDb);
       setTransactions(txs);
@@ -107,10 +108,12 @@ export function useTransactions() {
         .insert([toDb(newTx)])
         .select()
         .single();
-      if (!error && data) {
-        setTransactions((prev) => [fromDb(data), ...prev]);
-        return;
+      if (error) {
+        console.error('[useTransactions] insert error:', error);
+        throw new Error(error.message);
       }
+      setTransactions((prev) => [fromDb(data), ...prev]);
+      return;
     }
     setTransactions((prev) => [newTx, ...prev]);
   }, []);
@@ -127,10 +130,12 @@ export function useTransactions() {
         .from('transactions')
         .insert(withIds.map(toDb))
         .select();
-      if (!error && data) {
-        setTransactions((prev) => [...data.map(fromDb), ...prev]);
-        return;
+      if (error) {
+        console.error('[useTransactions] bulk insert error:', error);
+        throw new Error(error.message);
       }
+      setTransactions((prev) => [...data.map(fromDb), ...prev]);
+      return;
     }
     setTransactions((prev) => [...withIds, ...prev]);
   }, []);
