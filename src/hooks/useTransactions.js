@@ -61,6 +61,7 @@ export function useTransactions() {
     if (isSupabaseReady) {
       loadFromSupabase();
     } else {
+      console.warn('[useTransactions] OFFLINE MÓD — Supabase nincs konfigurálva, LocalStorage-ból tölt');
       setTransactions(localLoad(TX_KEY, sampleTransactions));
       setIncomeCategories(localLoad(CAT_KEY, INCOME_CATEGORIES_DEFAULT));
       setExpenseCategories(localLoad(EXPENSE_CAT_KEY, EXPENSE_CATEGORIES));

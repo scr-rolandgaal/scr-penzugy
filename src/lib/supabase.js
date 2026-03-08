@@ -10,3 +10,6 @@ export const supabase =
     : null;
 
 export const isSupabaseReady = Boolean(supabase);
+
+// Debug: konzolban látható, hogy Supabase elérhető-e
+console.log('[Supabase] isSupabaseReady:', isSupabaseReady, '| URL set:', Boolean(supabaseUrl), '| Key set:', Boolean(supabaseAnonKey));
