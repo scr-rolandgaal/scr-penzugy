@@ -1,4 +1,4 @@
-export default function Navbar({ activeTab, setActiveTab }) {
+export default function Navbar({ activeTab, setActiveTab, user, onSignOut }) {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'transactions', label: 'Tranzakciók' },
@@ -45,6 +45,19 @@ export default function Navbar({ activeTab, setActiveTab }) {
             </button>
           ))}
         </div>
+
+        {/* User / kijelentkezés */}
+        {user && onSignOut && (
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="text-xs text-gray-400 hidden sm:block">{user.email}</span>
+            <button
+              onClick={onSignOut}
+              className="text-xs px-3 py-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-all"
+            >
+              Kilépés
+            </button>
+          </div>
+        )}
       </div>
     </nav>
   );
