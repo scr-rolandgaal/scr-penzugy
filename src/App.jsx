@@ -61,7 +61,7 @@ function MainApp({ user, onSignOut }) {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} user={user} onSignOut={onSignOut} />
+      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} user={user} onSignOut={onSignOut} dbConnected={isSupabaseReady} />
 
       {loading ? (
         <LoadingSpinner />

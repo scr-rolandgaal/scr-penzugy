@@ -38,7 +38,7 @@ const MOBILE_LABELS = {
   clients: 'Ügyfelek',
 };
 
-export default function Navbar({ activeTab, setActiveTab, user, onSignOut }) {
+export default function Navbar({ activeTab, setActiveTab, user, onSignOut, dbConnected }) {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'transactions', label: 'Tranzakciók' },
@@ -94,6 +94,16 @@ export default function Navbar({ activeTab, setActiveTab, user, onSignOut }) {
             {user && (
               <span className="text-xs text-gray-400 hidden md:block truncate max-w-36">{user.email}</span>
             )}
+            <span
+              title={dbConnected ? 'Supabase kapcsolat aktív' : 'Offline mód — csak LocalStorage'}
+              className="text-xs px-2 py-0.5 rounded-full font-semibold"
+              style={{
+                background: dbConnected ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)',
+                color: dbConnected ? '#22C55E' : '#EF4444',
+              }}
+            >
+              {dbConnected ? '● DB' : '● Offline'}
+            </span>
             {onSignOut && (
               <button
                 onClick={onSignOut}
