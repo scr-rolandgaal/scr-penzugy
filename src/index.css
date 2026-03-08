@@ -103,6 +103,21 @@ button { font-family: inherit; }
   border-bottom: 1px solid #222;
 }
 
+/* ─── Mobile content padding (bottom tab bar + iOS safe area) ─── */
+.mobile-content-wrap {
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom));
+}
+@media (min-width: 640px) {
+  .mobile-content-wrap { padding-bottom: 0; }
+}
+
+/* ─── iOS input zoom prevention (font-size must be ≥16px) ─── */
+@supports (-webkit-touch-callout: none) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
 /* ─── Mobile responsive tweaks ─── */
 @media (max-width: 639px) {
   .modal-overlay {

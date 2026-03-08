@@ -61,7 +61,7 @@ export function useForecasts() {
       .select('*')
       .order('created_at', { ascending: false });
 
-    const fcs = data?.length > 0 ? data.map(fromDb) : sampleForecasts;
+    const fcs = data ? data.map(fromDb) : [];
     setForecasts(fcs);
     setLoading(false);
   }

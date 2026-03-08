@@ -109,7 +109,7 @@ export default function Navbar({ activeTab, setActiveTab, user, onSignOut }) {
       {/* ── Mobile bottom tab bar ──────────────────────────────── */}
       <div
         className="fixed bottom-0 left-0 right-0 z-40 sm:hidden flex border-t border-gray-800"
-        style={{ background: '#111111' }}
+        style={{ background: '#111111', paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         {tabs.map((tab) => {
           const active = activeTab === tab.id;
@@ -117,7 +117,7 @@ export default function Navbar({ activeTab, setActiveTab, user, onSignOut }) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors"
+              className="flex-1 flex flex-col items-center justify-center py-2 gap-0.5 transition-colors relative"
               style={{ color: active ? '#9B79FF' : '#6B7280' }}
             >
               <TabIcon id={tab.id} />

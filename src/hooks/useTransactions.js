@@ -77,7 +77,7 @@ export function useTransactions() {
     ]);
 
     if (txRes.data) {
-      const txs = txRes.data.length > 0 ? txRes.data.map(fromDb) : sampleTransactions;
+      const txs = txRes.data.map(fromDb);
       setTransactions(txs);
       localSave(TX_KEY, txs);
     }

@@ -66,7 +66,7 @@ function MainApp({ user, onSignOut }) {
       {loading ? (
         <LoadingSpinner />
       ) : (
-        <div className="pb-16 sm:pb-0">
+        <div className="mobile-content-wrap">
           {activeTab === 'dashboard' && (
             <Dashboard
               transactions={transactions}
