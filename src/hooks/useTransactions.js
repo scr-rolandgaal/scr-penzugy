@@ -79,9 +79,10 @@ export function useTransactions() {
 
     if (txRes.error) console.error('[useTransactions] load error:', txRes.error);
     if (txRes.data) {
-      const txs = txRes.data.map(fromDb);
+      const txs = txRes.data.length > 0
+        ? txRes.data.map(fromDb)
+        : localLoad(TX_KEY, []);
       setTransactions(txs);
-      localSave(TX_KEY, txs);
     }
 
     if (catRes.data && catRes.data.length > 0) {
@@ -95,7 +96,7 @@ export function useTransactions() {
   }
 
   useEffect(() => {
-    if (!isSupabaseReady && !loading) localSave(TX_KEY, transactions);
+    if (!loading) localSave(TX_KEY, transactions);
   }, [transactions, loading]);
 
   // ── Hozzáadás ───────────────────────────────────────────────

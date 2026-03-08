@@ -61,13 +61,15 @@ export function useForecasts() {
       .select('*')
       .order('created_at', { ascending: false });
 
-    const fcs = data ? data.map(fromDb) : [];
+    const fcs = data?.length > 0
+      ? data.map(fromDb)
+      : JSON.parse(localStorage.getItem(KEY) || '[]');
     setForecasts(fcs);
     setLoading(false);
   }
 
   useEffect(() => {
-    if (!isSupabaseReady && !loading) {
+    if (!loading) {
       try { localStorage.setItem(KEY, JSON.stringify(forecasts)); } catch {}
     }
   }, [forecasts, loading]);
