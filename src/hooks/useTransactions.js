@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase, isSupabaseReady } from '../lib/supabase';
-import { sampleTransactions, INCOME_CATEGORIES_DEFAULT } from '../data/sampleData';
+import { INCOME_CATEGORIES_DEFAULT } from '../data/sampleData';
 
 const TX_KEY = 'scrollers_transactions';
 const CAT_KEY = 'scrollers_income_categories';
@@ -57,7 +57,7 @@ export function useTransactions() {
     if (isSupabaseReady) {
       loadFromSupabase();
     } else {
-      setTransactions(localLoad(TX_KEY, sampleTransactions));
+      setTransactions(localLoad(TX_KEY, []));
       setIncomeCategories(localLoad(CAT_KEY, INCOME_CATEGORIES_DEFAULT));
       setLoading(false);
     }
@@ -71,7 +71,7 @@ export function useTransactions() {
     ]);
 
     if (txRes.data) {
-      const txs = txRes.data.length > 0 ? txRes.data.map(fromDb) : sampleTransactions;
+      const txs = txRes.data.map(fromDb);
       setTransactions(txs);
       localSave(TX_KEY, txs); // offline cache
     }
