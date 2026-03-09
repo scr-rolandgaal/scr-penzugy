@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { EXPENSE_CATEGORIES } from '../../data/sampleData';
 import { formatHUF } from '../../utils/formatters';
 
 const VAT_RATES = [0, 5, 18, 27];
@@ -13,12 +12,40 @@ const defaultForm = {
   vatRate: 27,
   status: 'fizetve',
   notes: '',
+  projectType: null,
 };
 
-export default function AddTransactionModal({ onClose, onAdd, incomeCategories, onAddCategory, canManageCategories = true }) {
-  const [form, setForm] = useState(defaultForm);
+export default function AddTransactionModal({
+  onClose,
+  onAdd,
+  onUpdate,
+  incomeCategories,
+  expenseCategories,
+  onAddCategory,
+  onAddExpenseCategory,
+  editMode = false,
+  initialData = null,
+  knownPartners = [],
+  canManageCategories = true,
+}) {
+  const [form, setForm] = useState(() => {
+    if (editMode && initialData) {
+      return {
+        date: initialData.date,
+        type: initialData.type,
+        category: initialData.category,
+        partner: initialData.partner || '',
+        amount: String(initialData.amount),
+        vatRate: initialData.vatRate ?? 27,
+        status: initialData.status,
+        notes: initialData.notes || '',
+        projectType: initialData.projectType || null,
+      };
+    }
+    return defaultForm;
+  });
 
-  const categories = form.type === 'bevétel' ? incomeCategories : EXPENSE_CATEGORIES;
+  const categories = form.type === 'bevétel' ? incomeCategories : expenseCategories;
   const netAmount = form.amount ? Math.round(Number(form.amount) / (1 + form.vatRate / 100)) : null;
   const vatAmount = netAmount && form.amount ? Number(form.amount) - netAmount : null;
 
@@ -30,15 +57,24 @@ export default function AddTransactionModal({ onClose, onAdd, incomeCategories, 
     }));
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!form.date || !form.category || !form.amount) return;
-    onAdd({
+    const payload = {
       ...form,
       amount: Number(form.amount),
       vatRate: Number(form.vatRate),
-    });
-    onClose();
+    };
+    try {
+      if (editMode) {
+        await onUpdate(payload);
+      } else {
+        await onAdd(payload);
+      }
+      onClose();
+    } catch (err) {
+      alert(`Mentés sikertelen:\n\n${err.message}`);
+    }
   }
 
   function handleAddCategory() {
@@ -49,11 +85,21 @@ export default function AddTransactionModal({ onClose, onAdd, incomeCategories, 
     }
   }
 
+  function handleAddExpenseCategory() {
+    const name = prompt('Új kiadási kategória neve:');
+    if (name?.trim()) {
+      onAddExpenseCategory(name.trim());
+      set('category', name.trim());
+    }
+  }
+
   return (
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="modal-box">
         <div className="flex items-center justify-between mb-5">
-          <h2 className="text-lg font-bold text-gray-800">Új tranzakció</h2>
+          <h2 className="text-lg font-bold text-gray-800">
+            {editMode ? 'Tranzakció szerkesztése' : 'Új tranzakció'}
+          </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl font-bold bg-transparent border-none p-0 cursor-pointer">
             ×
           </button>
@@ -119,6 +165,15 @@ export default function AddTransactionModal({ onClose, onAdd, incomeCategories, 
                   + Új
                 </button>
               )}
+              {form.type === 'kiadás' && canManageCategories && (
+                <button
+                  type="button"
+                  onClick={handleAddExpenseCategory}
+                  className="px-3 py-2 text-sm border border-purple-300 text-purple-600 rounded-lg hover:bg-purple-50"
+                >
+                  + Új
+                </button>
+              )}
             </div>
           </div>
 
@@ -127,11 +182,17 @@ export default function AddTransactionModal({ onClose, onAdd, incomeCategories, 
             <label className="block text-xs font-semibold text-gray-500 mb-1">Partner / Szállító</label>
             <input
               type="text"
+              list="partners-list"
               value={form.partner}
               onChange={(e) => set('partner', e.target.value)}
               placeholder="pl. TechVision Kft"
               className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-purple-400"
             />
+            {knownPartners.length > 0 && (
+              <datalist id="partners-list">
+                {knownPartners.map((p) => <option key={p} value={p} />)}
+              </datalist>
+            )}
           </div>
 
           {/* Összeg + ÁFA */}
@@ -172,6 +233,20 @@ export default function AddTransactionModal({ onClose, onAdd, incomeCategories, 
             </div>
           )}
 
+          {/* Projekt típus */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">Projekt típus</label>
+            <select
+              value={form.projectType || ''}
+              onChange={(e) => set('projectType', e.target.value || null)}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-purple-400"
+            >
+              <option value="">— Nem meghatározott —</option>
+              <option value="havi">Havi visszatérő</option>
+              <option value="egyszeri">Egyszeri projekt</option>
+            </select>
+          </div>
+
           {/* Státusz */}
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1">Státusz</label>
@@ -211,7 +286,7 @@ export default function AddTransactionModal({ onClose, onAdd, incomeCategories, 
               Mégse
             </button>
             <button type="submit" className="btn-primary flex-1 py-2 text-sm">
-              Mentés
+              {editMode ? 'Mentés' : 'Hozzáadás'}
             </button>
           </div>
         </form>

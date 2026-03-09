@@ -20,6 +20,10 @@ function fromDb(row) {
     expectedDate: row.expected_date,
     status: row.status,
     notes: row.notes || '',
+    forecastType: row.forecast_type || 'bevétel',
+    forClient: row.for_client || '',
+    vatRate: row.vat_rate || 0,
+    netAmount: row.net_amount || null,
   };
 }
 
@@ -31,6 +35,10 @@ function toDb(fc) {
     expected_date: fc.expectedDate,
     status: fc.status,
     notes: fc.notes || '',
+    forecast_type: fc.forecastType || 'bevétel',
+    for_client: fc.forClient || '',
+    vat_rate: fc.vatRate || 0,
+    net_amount: fc.netAmount || null,
   };
 }
 
@@ -53,13 +61,15 @@ export function useForecasts() {
       .select('*')
       .order('created_at', { ascending: false });
 
-    const fcs = data ? data.map(fromDb) : [];
+    const fcs = data?.length > 0
+      ? data.map(fromDb)
+      : JSON.parse(localStorage.getItem(KEY) || '[]');
     setForecasts(fcs);
     setLoading(false);
   }
 
   useEffect(() => {
-    if (!isSupabaseReady && !loading) {
+    if (!loading) {
       try { localStorage.setItem(KEY, JSON.stringify(forecasts)); } catch {}
     }
   }, [forecasts, loading]);

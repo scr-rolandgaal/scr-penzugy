@@ -1,6 +1,6 @@
 import { formatHUF, formatDate } from '../../utils/formatters';
 
-export default function TransactionRow({ tx, selected, onSelect, onToggleStatus, onDelete, canEdit = true }) {
+export default function TransactionRow({ tx, selected, onSelect, onToggleStatus, onDelete, onEdit, canEdit = true }) {
   const isIncome = tx.type === 'bevétel';
   const isPaid = tx.status === 'fizetve';
 
@@ -44,18 +44,27 @@ export default function TransactionRow({ tx, selected, onSelect, onToggleStatus,
         </button>
       </td>
       {canEdit && (
-        <td className="py-3 px-3 text-right">
-          <button
-            onClick={() => {
-              if (window.confirm(`Biztosan törlöd ezt a tranzakciót?\n${tx.partner} — ${formatHUF(tx.amount)}`)) {
-                onDelete(tx.id);
-              }
-            }}
-            className="text-gray-300 hover:text-red-500 transition-colors text-lg bg-transparent border-none cursor-pointer"
-            title="Törlés"
-          >
-            🗑
-          </button>
+        <td className="py-3 px-2 text-right">
+          <div className="flex items-center justify-end gap-0.5">
+            <button
+              onClick={() => onEdit(tx.id)}
+              className="text-gray-300 hover:text-blue-500 transition-colors text-base bg-transparent border-none cursor-pointer"
+              title="Szerkesztés"
+            >
+              ✏
+            </button>
+            <button
+              onClick={() => {
+                if (window.confirm(`Biztosan törlöd ezt a tranzakciót?\n${tx.partner} — ${formatHUF(tx.amount)}`)) {
+                  onDelete(tx.id);
+                }
+              }}
+              className="text-gray-300 hover:text-red-500 transition-colors text-lg bg-transparent border-none cursor-pointer"
+              title="Törlés"
+            >
+              🗑
+            </button>
+          </div>
         </td>
       )}
     </tr>

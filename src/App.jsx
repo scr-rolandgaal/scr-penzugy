@@ -1,17 +1,19 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard/Dashboard';
 import TransactionList from './components/Transactions/TransactionList';
 import ForecastView from './components/Forecast/ForecastView';
+import ClientsView from './components/Clients/ClientsView';
 import LoginPage from './components/LoginPage';
 import UsersView from './components/Users/UsersView';
 import DemoBanner from './components/DemoBanner';
 import { useTransactions } from './hooks/useTransactions';
 import { useForecasts } from './hooks/useForecasts';
+import { useGoals } from './hooks/useGoals';
 import { useAuth } from './hooks/useAuth';
 import { useUserRole } from './hooks/useUserRole';
 import { isSupabaseReady, isDemoMode } from './lib/supabase';
-import { sampleTransactions, sampleForecasts } from './data/sampleData';
+import { getKnownPartners } from './utils/calculations';
 
 function LoadingSpinner() {
   return (
@@ -31,12 +33,16 @@ function MainApp({ user, onSignOut, userRole }) {
   const {
     transactions,
     incomeCategories,
+    expenseCategories,
     loading: txLoading,
     addTransaction,
+    addTransactions,
+    updateTransaction,
     deleteTransaction,
     deleteTransactions,
     toggleStatus,
     addIncomeCategory,
+    addExpenseCategory,
     resetDemo,
   } = useTransactions();
 
@@ -48,6 +54,13 @@ function MainApp({ user, onSignOut, userRole }) {
     deleteForecast,
     resetDemo: resetDemoFc,
   } = useForecasts();
+
+  const { goals, setGoal } = useGoals();
+
+  const knownPartners = useMemo(
+    () => getKnownPartners(transactions, forecasts),
+    [transactions, forecasts]
+  );
 
   const loading = txLoading || fcLoading;
 
@@ -68,6 +81,7 @@ function MainApp({ user, onSignOut, userRole }) {
         setActiveTab={setActiveTab}
         user={user}
         onSignOut={onSignOut}
+        dbConnected={isSupabaseReady}
         canManageUsers={canManageUsers}
         userRole={userRole}
       />
@@ -75,21 +89,31 @@ function MainApp({ user, onSignOut, userRole }) {
       {loading ? (
         <LoadingSpinner />
       ) : (
-        <>
+        <div className="mobile-content-wrap">
           {activeTab === 'dashboard' && (
-            <Dashboard transactions={transactions} forecasts={forecasts} />
+            <Dashboard
+              transactions={transactions}
+              forecasts={forecasts}
+              goals={goals}
+              setGoal={setGoal}
+            />
           )}
           {activeTab === 'transactions' && (
             <TransactionList
               transactions={transactions}
               incomeCategories={incomeCategories}
+              expenseCategories={expenseCategories}
               onToggleStatus={toggleStatus}
               onDelete={deleteTransaction}
               onDeleteBulk={deleteTransactions}
               onAdd={addTransaction}
+              onAddBulk={addTransactions}
               onAddCategory={addIncomeCategory}
               canEdit={canEdit}
               canManageCategories={canManageCategories}
+              onAddExpenseCategory={addExpenseCategory}
+              onUpdateTransaction={updateTransaction}
+              knownPartners={knownPartners}
             />
           )}
           {activeTab === 'forecast' && (
@@ -99,12 +123,16 @@ function MainApp({ user, onSignOut, userRole }) {
               onStatusChange={updateForecastStatus}
               onDelete={deleteForecast}
               canEdit={canEdit}
+              knownClients={knownPartners}
             />
+          )}
+          {activeTab === 'clients' && (
+            <ClientsView transactions={transactions} forecasts={forecasts} />
           )}
           {activeTab === 'users' && canManageUsers && (
             <UsersView userRole={userRole} />
           )}
-        </>
+        </div>
       )}
     </div>
   );

@@ -2,21 +2,29 @@ import { useState, useMemo } from 'react';
 import TransactionRow from './TransactionRow';
 import TransactionFilters from './TransactionFilters';
 import AddTransactionModal from '../AddTransaction/AddTransactionModal';
+import BankImportModal from '../Import/BankImportModal';
 
 export default function TransactionList({
   transactions,
   incomeCategories,
+  expenseCategories,
   onToggleStatus,
   onDelete,
   onDeleteBulk,
   onAdd,
+  onAddBulk,
   onAddCategory,
   canEdit = true,
   canManageCategories = true,
+  onAddExpenseCategory,
+  onUpdateTransaction,
+  knownPartners,
 }) {
   const [filters, setFilters] = useState({ month: '', type: '', category: '', status: '' });
   const [selected, setSelected] = useState(new Set());
   const [showModal, setShowModal] = useState(false);
+  const [showImport, setShowImport] = useState(false);
+  const [editingTx, setEditingTx] = useState(null);
 
   const filtered = useMemo(() => {
     return transactions.filter((tx) => {
@@ -48,20 +56,35 @@ export default function TransactionList({
     }
   }
 
+  function handleEdit(txId) {
+    const tx = transactions.find((t) => t.id === txId);
+    if (tx) setEditingTx(tx);
+  }
+
   const allSelected = filtered.length > 0 && filtered.every((tx) => selected.has(tx.id));
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col gap-4">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-xl font-bold text-gray-800">Tranzakciók</h2>
         {canEdit && (
-          <button
-            onClick={() => setShowModal(true)}
-            className="btn-primary text-sm"
-          >
-            + Tranzakció hozzáadása
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowImport(true)}
+              className="text-sm px-3 py-2 rounded-lg border border-purple-300 text-purple-600 hover:bg-purple-50 transition-colors"
+            >
+              <span className="hidden sm:inline">↑ Bank Import</span>
+              <span className="sm:hidden">↑ Import</span>
+            </button>
+            <button
+              onClick={() => setShowModal(true)}
+              className="btn-primary text-sm"
+            >
+              <span className="hidden sm:inline">+ Tranzakció hozzáadása</span>
+              <span className="sm:hidden">+ Hozzáadás</span>
+            </button>
+          </div>
         )}
       </div>
 
@@ -133,6 +156,7 @@ export default function TransactionList({
                   onToggleStatus={onToggleStatus}
                   onDelete={onDelete}
                   canEdit={canEdit}
+                  onEdit={handleEdit}
                 />
               ))
             )}
@@ -150,8 +174,40 @@ export default function TransactionList({
           onClose={() => setShowModal(false)}
           onAdd={onAdd}
           incomeCategories={incomeCategories}
+          expenseCategories={expenseCategories}
           onAddCategory={onAddCategory}
           canManageCategories={canManageCategories}
+          onAddExpenseCategory={onAddExpenseCategory}
+          knownPartners={knownPartners}
+        />
+      )}
+
+      {editingTx && (
+        <AddTransactionModal
+          onClose={() => setEditingTx(null)}
+          onUpdate={(updates) => {
+            onUpdateTransaction(editingTx.id, updates);
+            setEditingTx(null);
+          }}
+          incomeCategories={incomeCategories}
+          expenseCategories={expenseCategories}
+          onAddCategory={onAddCategory}
+          onAddExpenseCategory={onAddExpenseCategory}
+          canManageCategories={canManageCategories}
+          editMode
+          initialData={editingTx}
+          knownPartners={knownPartners}
+        />
+      )}
+
+      {canEdit && showImport && (
+        <BankImportModal
+          onClose={() => setShowImport(false)}
+          onImport={onAddBulk}
+          incomeCategories={incomeCategories}
+          expenseCategories={expenseCategories}
+          onAddCategory={onAddCategory}
+          onAddExpenseCategory={onAddExpenseCategory}
         />
       )}
     </div>

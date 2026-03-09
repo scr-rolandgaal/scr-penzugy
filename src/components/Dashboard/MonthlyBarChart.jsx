@@ -39,8 +39,8 @@ export default function MonthlyBarChart({ data, forecastData }) {
 
   return (
     <div className="card">
-      <h3 className="font-bold text-gray-700 mb-4">Havi Bevétel / Kiadás (2026)</h3>
-      <ResponsiveContainer width="100%" height={260}>
+      <h3 className="font-bold text-gray-700 mb-4">Havi Bevétel / Kiadás</h3>
+      <ResponsiveContainer width="100%" height={220}>
         <BarChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e9e5ff" />
           <XAxis dataKey="month" tick={{ fontSize: 12 }} />
