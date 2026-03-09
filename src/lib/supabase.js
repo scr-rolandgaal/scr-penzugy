@@ -3,9 +3,11 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Ha nincs konfigurálva, null — a hookokban localStorage fallback lép életbe
+export const isDemoMode = import.meta.env.VITE_DEMO_MODE === 'true';
+
+// Ha nincs konfigurálva vagy demo mód → null; hookokban localStorage fallback lép életbe
 export const supabase =
-  supabaseUrl && supabaseAnonKey
+  !isDemoMode && supabaseUrl && supabaseAnonKey
     ? createClient(supabaseUrl, supabaseAnonKey)
     : null;
 

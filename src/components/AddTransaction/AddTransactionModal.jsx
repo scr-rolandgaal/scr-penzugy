@@ -15,7 +15,7 @@ const defaultForm = {
   notes: '',
 };
 
-export default function AddTransactionModal({ onClose, onAdd, incomeCategories, onAddCategory }) {
+export default function AddTransactionModal({ onClose, onAdd, incomeCategories, onAddCategory, canManageCategories = true }) {
   const [form, setForm] = useState(defaultForm);
 
   const categories = form.type === 'bevétel' ? incomeCategories : EXPENSE_CATEGORIES;
@@ -110,7 +110,7 @@ export default function AddTransactionModal({ onClose, onAdd, incomeCategories, 
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
-              {form.type === 'bevétel' && (
+              {form.type === 'bevétel' && canManageCategories && (
                 <button
                   type="button"
                   onClick={handleAddCategory}

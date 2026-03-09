@@ -11,7 +11,7 @@ const STATUS_COLORS = {
   Folyamatban: { bg: '#FAF5FF', border: '#DDD6FE', text: '#6C3FC5', dot: '#8B5CF6' },
 };
 
-function ForecastCard({ fc, onStatusChange, onDelete }) {
+function ForecastCard({ fc, onStatusChange, onDelete, canEdit }) {
   const colors = STATUS_COLORS[fc.status];
   return (
     <div
@@ -23,31 +23,42 @@ function ForecastCard({ fc, onStatusChange, onDelete }) {
           <p className="font-bold text-gray-800 truncate">{fc.clientName}</p>
           <p className="text-gray-500 text-xs">{fc.projectType}</p>
         </div>
-        <button
-          onClick={() => onDelete(fc.id)}
-          className="text-gray-300 hover:text-red-400 bg-transparent border-none cursor-pointer text-base shrink-0"
-        >
-          ×
-        </button>
+        {canEdit && (
+          <button
+            onClick={() => onDelete(fc.id)}
+            className="text-gray-300 hover:text-red-400 bg-transparent border-none cursor-pointer text-base shrink-0"
+          >
+            ×
+          </button>
+        )}
       </div>
       <p className="font-bold mt-1" style={{ color: colors.text }}>
         {formatHUF(fc.expectedAmount)}
       </p>
       <p className="text-xs text-gray-400 mt-0.5">{formatDate(fc.expectedDate)}</p>
       {fc.notes && <p className="text-xs text-gray-400 mt-1 italic truncate">{fc.notes}</p>}
-      <select
-        value={fc.status}
-        onChange={(e) => onStatusChange(fc.id, e.target.value)}
-        className="mt-2 w-full border rounded-lg px-2 py-1 text-xs focus:outline-none"
-        style={{ borderColor: colors.border, color: colors.text, background: 'white' }}
-      >
-        {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-      </select>
+      {canEdit ? (
+        <select
+          value={fc.status}
+          onChange={(e) => onStatusChange(fc.id, e.target.value)}
+          className="mt-2 w-full border rounded-lg px-2 py-1 text-xs focus:outline-none"
+          style={{ borderColor: colors.border, color: colors.text, background: 'white' }}
+        >
+          {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
+      ) : (
+        <span
+          className="mt-2 inline-block text-xs px-2 py-0.5 rounded-full"
+          style={{ background: colors.bg, color: colors.text, border: `1px solid ${colors.border}` }}
+        >
+          {fc.status}
+        </span>
+      )}
     </div>
   );
 }
 
-export default function ForecastView({ forecasts, onAdd, onStatusChange, onDelete }) {
+export default function ForecastView({ forecasts, onAdd, onStatusChange, onDelete, canEdit = true }) {
   const [showForm, setShowForm] = useState(false);
 
   const totalPipeline = forecasts.reduce((s, f) => s + f.expectedAmount, 0);
@@ -61,9 +72,11 @@ export default function ForecastView({ forecasts, onAdd, onStatusChange, onDelet
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl font-bold text-gray-800">Revenue Tervezés</h2>
-        <button onClick={() => setShowForm(true)} className="btn-primary text-sm">
-          + Új tétel
-        </button>
+        {canEdit && (
+          <button onClick={() => setShowForm(true)} className="btn-primary text-sm">
+            + Új tétel
+          </button>
+        )}
       </div>
 
       {/* KPI összesítők */}
@@ -110,6 +123,7 @@ export default function ForecastView({ forecasts, onAdd, onStatusChange, onDelet
                     fc={fc}
                     onStatusChange={onStatusChange}
                     onDelete={onDelete}
+                    canEdit={canEdit}
                   />
                 ))}
                 {items.length === 0 && (

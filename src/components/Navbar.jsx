@@ -1,8 +1,9 @@
-export default function Navbar({ activeTab, setActiveTab, user, onSignOut }) {
+export default function Navbar({ activeTab, setActiveTab, user, onSignOut, canManageUsers }) {
   const tabs = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'transactions', label: 'Tranzakciók' },
     { id: 'forecast', label: 'Tervezés' },
+    ...(canManageUsers ? [{ id: 'users', label: 'Felhasználók' }] : []),
   ];
 
   return (
@@ -56,6 +57,11 @@ export default function Navbar({ activeTab, setActiveTab, user, onSignOut }) {
             >
               Kilépés
             </button>
+          </div>
+        )}
+        {user && !onSignOut && (
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="text-xs text-gray-400 hidden sm:block">{user.email}</span>
           </div>
         )}
       </div>

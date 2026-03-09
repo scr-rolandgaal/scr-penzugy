@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase, isSupabaseReady } from '../lib/supabase';
+import { sampleForecasts } from '../data/sampleData';
 
 const KEY = 'scrollers_forecasts';
 
@@ -90,5 +91,12 @@ export function useForecasts() {
     setForecasts((prev) => prev.filter((fc) => fc.id !== id));
   }, []);
 
-  return { forecasts, loading, addForecast, updateForecastStatus, deleteForecast };
+  const resetDemo = useCallback(() => {
+    if (!isSupabaseReady) {
+      localStorage.removeItem(KEY);
+      setForecasts(sampleForecasts);
+    }
+  }, []);
+
+  return { forecasts, loading, addForecast, updateForecastStatus, deleteForecast, resetDemo };
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase, isSupabaseReady } from '../lib/supabase';
-import { INCOME_CATEGORIES_DEFAULT } from '../data/sampleData';
+import { INCOME_CATEGORIES_DEFAULT, sampleTransactions } from '../data/sampleData';
 
 const TX_KEY = 'scrollers_transactions';
 const CAT_KEY = 'scrollers_income_categories';
@@ -29,6 +29,7 @@ function fromDb(row) {
     netAmount: row.net_amount,
     status: row.status,
     notes: row.notes || '',
+    projectType: row.project_type || '',
   };
 }
 
@@ -44,6 +45,7 @@ function toDb(tx) {
     net_amount: tx.netAmount,
     status: tx.status,
     notes: tx.notes || '',
+    project_type: tx.projectType || '',
   };
 }
 
@@ -153,6 +155,15 @@ export function useTransactions() {
     });
   }, [incomeCategories]);
 
+  const resetDemo = useCallback(() => {
+    if (!isSupabaseReady) {
+      localStorage.removeItem(TX_KEY);
+      localStorage.removeItem(CAT_KEY);
+      setTransactions(sampleTransactions);
+      setIncomeCategories(INCOME_CATEGORIES_DEFAULT);
+    }
+  }, []);
+
   return {
     transactions,
     incomeCategories,
@@ -162,5 +173,6 @@ export function useTransactions() {
     deleteTransactions,
     toggleStatus,
     addIncomeCategory,
+    resetDemo,
   };
 }

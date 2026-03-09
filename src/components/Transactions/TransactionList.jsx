@@ -11,6 +11,8 @@ export default function TransactionList({
   onDeleteBulk,
   onAdd,
   onAddCategory,
+  canEdit = true,
+  canManageCategories = true,
 }) {
   const [filters, setFilters] = useState({ month: '', type: '', category: '', status: '' });
   const [selected, setSelected] = useState(new Set());
@@ -53,12 +55,14 @@ export default function TransactionList({
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl font-bold text-gray-800">Tranzakciók</h2>
-        <button
-          onClick={() => setShowModal(true)}
-          className="btn-primary text-sm"
-        >
-          + Tranzakció hozzáadása
-        </button>
+        {canEdit && (
+          <button
+            onClick={() => setShowModal(true)}
+            className="btn-primary text-sm"
+          >
+            + Tranzakció hozzáadása
+          </button>
+        )}
       </div>
 
       {/* Szűrők */}
@@ -67,7 +71,7 @@ export default function TransactionList({
       </div>
 
       {/* Bulk toolbar */}
-      {selected.size > 0 && (
+      {canEdit && selected.size > 0 && (
         <div className="flex items-center gap-4 bg-purple-50 border border-purple-200 rounded-xl px-4 py-3">
           <span className="text-sm font-semibold text-purple-700">{selected.size} kijelölve</span>
           <button
@@ -90,14 +94,16 @@ export default function TransactionList({
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              <th className="py-3 px-3 text-left">
-                <input
-                  type="checkbox"
-                  checked={allSelected}
-                  onChange={(e) => handleSelectAll(e.target.checked)}
-                  className="w-4 h-4 accent-purple-600 cursor-pointer"
-                />
-              </th>
+              {canEdit && (
+                <th className="py-3 px-3 text-left">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    className="w-4 h-4 accent-purple-600 cursor-pointer"
+                  />
+                </th>
+              )}
               {['Dátum', 'Típus', 'Kategória', 'Partner', 'Összeg', 'ÁFA', 'Státusz', ''].map((h) => (
                 <th
                   key={h}
@@ -113,7 +119,7 @@ export default function TransactionList({
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={9} className="py-12 text-center text-gray-400 text-sm">
+                <td colSpan={canEdit ? 9 : 8} className="py-12 text-center text-gray-400 text-sm">
                   Nincs találat a szűrési feltételekre.
                 </td>
               </tr>
@@ -126,6 +132,7 @@ export default function TransactionList({
                   onSelect={handleSelect}
                   onToggleStatus={onToggleStatus}
                   onDelete={onDelete}
+                  canEdit={canEdit}
                 />
               ))
             )}
@@ -144,6 +151,7 @@ export default function TransactionList({
           onAdd={onAdd}
           incomeCategories={incomeCategories}
           onAddCategory={onAddCategory}
+          canManageCategories={canManageCategories}
         />
       )}
     </div>

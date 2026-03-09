@@ -4,10 +4,14 @@ import Dashboard from './components/Dashboard/Dashboard';
 import TransactionList from './components/Transactions/TransactionList';
 import ForecastView from './components/Forecast/ForecastView';
 import LoginPage from './components/LoginPage';
+import UsersView from './components/Users/UsersView';
+import DemoBanner from './components/DemoBanner';
 import { useTransactions } from './hooks/useTransactions';
 import { useForecasts } from './hooks/useForecasts';
 import { useAuth } from './hooks/useAuth';
-import { isSupabaseReady } from './lib/supabase';
+import { useUserRole } from './hooks/useUserRole';
+import { isSupabaseReady, isDemoMode } from './lib/supabase';
+import { sampleTransactions, sampleForecasts } from './data/sampleData';
 
 function LoadingSpinner() {
   return (
@@ -21,7 +25,7 @@ function LoadingSpinner() {
   );
 }
 
-function MainApp({ user, onSignOut }) {
+function MainApp({ user, onSignOut, userRole }) {
   const [activeTab, setActiveTab] = useState('dashboard');
 
   const {
@@ -33,6 +37,7 @@ function MainApp({ user, onSignOut }) {
     deleteTransactions,
     toggleStatus,
     addIncomeCategory,
+    resetDemo,
   } = useTransactions();
 
   const {
@@ -41,13 +46,31 @@ function MainApp({ user, onSignOut }) {
     addForecast,
     updateForecastStatus,
     deleteForecast,
+    resetDemo: resetDemoFc,
   } = useForecasts();
 
   const loading = txLoading || fcLoading;
 
+  function handleDemoReset() {
+    if (resetDemo) resetDemo();
+    if (resetDemoFc) resetDemoFc();
+  }
+
+  const canEdit = userRole === 'master_admin' || userRole === 'admin' || userRole === 'manager';
+  const canManageUsers = userRole === 'master_admin' || userRole === 'admin';
+  const canManageCategories = userRole === 'master_admin' || userRole === 'admin';
+
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }}>
-      <Navbar activeTab={activeTab} setActiveTab={setActiveTab} user={user} onSignOut={onSignOut} />
+      <DemoBanner onReset={handleDemoReset} />
+      <Navbar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        user={user}
+        onSignOut={onSignOut}
+        canManageUsers={canManageUsers}
+        userRole={userRole}
+      />
 
       {loading ? (
         <LoadingSpinner />
@@ -65,6 +88,8 @@ function MainApp({ user, onSignOut }) {
               onDeleteBulk={deleteTransactions}
               onAdd={addTransaction}
               onAddCategory={addIncomeCategory}
+              canEdit={canEdit}
+              canManageCategories={canManageCategories}
             />
           )}
           {activeTab === 'forecast' && (
@@ -73,7 +98,11 @@ function MainApp({ user, onSignOut }) {
               onAdd={addForecast}
               onStatusChange={updateForecastStatus}
               onDelete={deleteForecast}
+              canEdit={canEdit}
             />
+          )}
+          {activeTab === 'users' && canManageUsers && (
+            <UsersView userRole={userRole} />
           )}
         </>
       )}
@@ -83,12 +112,18 @@ function MainApp({ user, onSignOut }) {
 
 export default function App() {
   const { user, loading: authLoading, signIn, signOut } = useAuth();
+  const { userRole, roleLoading } = useUserRole(isDemoMode ? { id: 'demo', email: 'demo@demo.hu' } : user);
 
-  if (authLoading) return <LoadingSpinner />;
+  if (authLoading || (isSupabaseReady && !isDemoMode && user && roleLoading)) {
+    return <LoadingSpinner />;
+  }
 
-  if (isSupabaseReady && !user) {
+  // Demo módban nincs login
+  if (!isDemoMode && isSupabaseReady && !user) {
     return <LoginPage onLogin={signIn} />;
   }
 
-  return <MainApp user={user} onSignOut={signOut} />;
+  const effectiveRole = isDemoMode ? 'master_admin' : (userRole || 'master_admin');
+
+  return <MainApp user={isDemoMode ? { email: 'demo@scrollers.hu' } : user} onSignOut={isDemoMode ? null : signOut} userRole={effectiveRole} />;
 }
