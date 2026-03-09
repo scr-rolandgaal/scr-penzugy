@@ -1,14 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase, isSupabaseReady } from '../lib/supabase';
-import { sampleForecasts } from '../data/sampleData';
 
 const KEY = 'scrollers_forecasts';
 
 function localLoad() {
   try {
     const raw = localStorage.getItem(KEY);
-    return raw ? JSON.parse(raw) : sampleForecasts;
-  } catch { return sampleForecasts; }
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
 }
 
 function fromDb(row) {
@@ -53,7 +52,7 @@ export function useForecasts() {
       .select('*')
       .order('created_at', { ascending: false });
 
-    const fcs = data?.length > 0 ? data.map(fromDb) : sampleForecasts;
+    const fcs = data ? data.map(fromDb) : [];
     setForecasts(fcs);
     setLoading(false);
   }
